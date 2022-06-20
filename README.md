@@ -2,6 +2,16 @@
 
 ## Serialize object to API parameters using convenience property wrapper.
 
+_Useful to generate query items for URLComponents when build URLRequest_
+```swift
+let params = ParamSerializer().serialize(object: object)
+
+var components = URLComponents()
+components.host = "some.api"
+components.path = "some/api/path/"
+components.queryItems = params.map { URLQueryItem(name: $0.key, value: "\($0.value)")}
+```
+
 - Auto infer name of param from simple field name
 - Nil and empty array will be remove automatically
 - Auto handle array of elements that conform to `CustomStringConvertible`
