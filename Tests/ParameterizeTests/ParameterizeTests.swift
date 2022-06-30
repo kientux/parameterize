@@ -64,6 +64,10 @@ final class ParameterizeTests: XCTestCase {
         XCTAssert(serialized.keys.contains("namingConvert"))
         XCTAssert(serialized.keys.contains("namingConvert1"))
         XCTAssert(serialized.keys.contains("NamingConvert2"))
+        
+        serialized = ParamSerializer(config: .init(namingStrategy: UppercaseNamingStrategy()))
+            .serialize(object: params)
+        XCTAssert(serialized.keys.contains("NAMINGCONVERT"))
     }
 }
 
@@ -138,5 +142,11 @@ struct MyCustomType: ParamConvertible {
 extension Date: ParamConvertible {
     public var parameterValue: Any? {
         ISO8601DateFormatter().string(from: self)
+    }
+}
+
+class UppercaseNamingStrategy: NamingStrategy {
+    public func name(from fieldName: String) -> String {
+        return fieldName.uppercased()
     }
 }

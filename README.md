@@ -12,7 +12,7 @@ components.path = "some/api/path/"
 components.queryItems = params.map { URLQueryItem(name: $0.key, value: "\($0.value)")}
 ```
 
-- Auto infer name of param from simple field name
+- Auto infer name of param from field name, with default/snake_case or custom naming strategy
 - Nil and empty array will be remove automatically
 - Auto handle array of elements that conform to `CustomStringConvertible`
 - Auto expand nested params
@@ -82,4 +82,38 @@ let serialized = ParamSerializer().serialize(object: params)
 print(serialized)
 
 // ["query": "search", "name": "tux"]
+```
+
+### Naming strategy
+
+```swift
+struct ApiParam: ParamsContainer {
+    
+    @Params
+    var thisShouldBeSnakeCase: Int = 0
+}
+
+let params = ApiParam()
+let config = ParamSerializer.Config(namingStrategy: SerializerNamingStrategy.convertToSnakeCase)
+let serialized = ParamSerializer(config: config).serialize(object: params)
+print(serialized)
+
+// ["this_should_be_snake_case": 0]
+```
+
+- Any custom naming strategy can be done by conforming to `NamingStrategy`
+
+```swift
+class UppercaseNamingStrategy: NamingStrategy {
+    public func name(from fieldName: String) -> String {
+        return fieldName.uppercased()
+    }
+}
+
+let params = ApiParam()
+let config = ParamSerializer.Config(namingStrategy: UppercaseNamingStrategy())
+let serialized = ParamSerializer(config: config).serialize(object: params)
+print(serialized)
+
+// ["THISSHOULDBESNAKECASE": 0]
 ```
