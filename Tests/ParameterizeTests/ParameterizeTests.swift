@@ -48,10 +48,22 @@ final class ParameterizeTests: XCTestCase {
     
     func testConfig() throws {
         let params = ProductParams(query: "")
-        let serialized = ParamSerializer(config: .init(ignoreEmptyString: true))
+        var serialized = ParamSerializer(config: .init(ignoreEmptyString: true))
             .serialize(object: params)
         
         XCTAssert(!serialized.keys.contains("query"))
+        
+        serialized = ParamSerializer(config: .init(namingStrategy: SerializerNamingStrategy.convertToSnakeCase))
+            .serialize(object: params)
+        XCTAssert(serialized.keys.contains("naming_convert"))
+        XCTAssert(serialized.keys.contains("naming_convert1"))
+        XCTAssert(serialized.keys.contains("naming_convert2"))
+        
+        serialized = ParamSerializer(config: .init(namingStrategy: SerializerNamingStrategy.default))
+            .serialize(object: params)
+        XCTAssert(serialized.keys.contains("namingConvert"))
+        XCTAssert(serialized.keys.contains("namingConvert1"))
+        XCTAssert(serialized.keys.contains("NamingConvert2"))
     }
 }
 
@@ -83,6 +95,15 @@ struct ProductParams: ParamsContainer {
     
     @Params("custom_type")
     var myUrl: MyCustomType? = nil
+    
+    @Params
+    var namingConvert: Int = 0
+    
+    @Params
+    var namingConvert1: Int = 0
+    
+    @Params
+    var NamingConvert2: Int = 0
     
     var filter: Filter = .init()
     

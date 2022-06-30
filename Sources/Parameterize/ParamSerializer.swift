@@ -5,6 +5,8 @@
 //  Created by Kien Nguyen on 17/06/2022.
 //
 
+import Foundation
+
 public class ParamSerializer {
     
     private let config: Config
@@ -36,7 +38,8 @@ public class ParamSerializer {
                 
                 // property wrapper add _ to its underlying property's label
                 if let label = child.label?.dropFirst() {
-                    params[String(label)] = value
+                    let key = config.namingStrategy.name(from: String(label))
+                    params[key] = value
                 }
             case let container as ParamsContainer:
                 let containerParams = serialize(object: container)
@@ -55,9 +58,12 @@ public class ParamSerializer {
 extension ParamSerializer {
     public struct Config {
         public var ignoreEmptyString: Bool = false
+        public var namingStrategy: NamingStrategy = SerializerNamingStrategy.default
         
-        public init(ignoreEmptyString: Bool = false) {
+        public init(ignoreEmptyString: Bool = false,
+                    namingStrategy: NamingStrategy = SerializerNamingStrategy.default) {
             self.ignoreEmptyString = ignoreEmptyString
+            self.namingStrategy = namingStrategy
         }
     }
 }
