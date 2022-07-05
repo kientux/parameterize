@@ -27,6 +27,12 @@ public class ParamSerializer {
                     break
                 }
                 
+                // if value is double-wrapped in an Optional
+                // then the above check is not enough, even when value is actually nil.
+                if let v = value as? OptionalProtocol, v.isNil {
+                    break
+                }
+                
                 if config.ignoreEmptyString, let s = value as? String, s.isEmpty {
                     break
                 }

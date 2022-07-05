@@ -3,6 +3,7 @@
 ## Serialize object to API parameters using convenience property wrapper.
 
 _Useful to generate query items for URLComponents when build URLRequest_
+
 ```swift
 let params = ParamSerializer().serialize(object: object)
 
@@ -16,7 +17,7 @@ components.queryItems = params.map { URLQueryItem(name: $0.key, value: "\($0.val
 - Nil and empty array will be remove automatically
 - Auto handle array of elements that conform to `CustomStringConvertible`
 - Auto expand nested params
-- Support custom type by conforms to `ParamConvertible`
+- Support any custom type by conforms to `ParamConvertible`, or simply use an in-place custom mapper
 
 ```swift
 struct ApiParam: ParamsContainer {
@@ -60,6 +61,30 @@ print(serialized)
 
 // [..., "date": "1970-01-01T00:00:01Z"]
 ```
+
+### _...or just use a custom mapper in-place_
+
+```swift
+struct ApiParam: ParamsContainer {
+    
+    @Params(mapper: { 
+        if let i = $0 {
+            return i + 1
+        } else {
+            return nil
+        }
+    })
+    var autoIncrement: Int? = nil
+}
+
+let params = ApiParam(autoIncrement: 100)
+let serialized = ParamSerializer().serialize(object: params)
+print(serialized)
+
+// ["autoIncrement": 101]
+```
+
+> Note: Conversion will go through custom mapper first, if the returned value also conforms to `ParamConvertible` then it will be converted again using the `ParamConvertible` implementation.
 
 ### Nested params will be expanded if also conforms to `ParamsContainer`
 

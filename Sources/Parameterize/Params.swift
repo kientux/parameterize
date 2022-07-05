@@ -10,7 +10,10 @@ import Foundation
 @propertyWrapper
 public struct Params<T> {
     
+    public typealias Mapper = (T) -> Any?
+    
     let name: String
+    let mapper: Mapper?
     
     public var wrappedValue: T
     
@@ -18,8 +21,11 @@ public struct Params<T> {
         wrappedValue
     }
     
-    public init(wrappedValue: T, _ name: String = "") {
+    public init(wrappedValue: T,
+                _ name: String = "",
+                mapper: Mapper? = nil) {
         self.name = name
+        self.mapper = mapper
         self.wrappedValue = wrappedValue
     }
 }
@@ -30,14 +36,24 @@ extension Params: ParameterPair {
     }
     
     var value: Any? {
-        var v: Any? = wrappedValue
+        if let mapper = mapper {
+            return process(value: mapper(wrappedValue))
+        } else {
+            return process(value: wrappedValue)
+        }
+    }
+    
+    private func process(value: Any?) -> Any? {
+        var v: Any? = nil
         
-        if let value = wrappedValue as? OptionalProtocol {
+        if let value = value as? OptionalProtocol {
             v = value.wrapped
+        } else {
+            v = value
         }
         
         if let value = v as? ParamConvertible {
-            return value.parameterValue
+            v = value.parameterValue
         }
         
         return v

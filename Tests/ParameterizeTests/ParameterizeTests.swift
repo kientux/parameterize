@@ -26,6 +26,7 @@ final class ParameterizeTests: XCTestCase {
         
         XCTAssertEqual(serialized["created_on_min"] as? String, "1970-01-01T00:00:01Z")
         XCTAssertEqual(serialized["custom_type"] as? String, "https%3A%2F%2Fgoogle%2Ecom")
+        XCTAssert(!serialized.keys.contains("created_on_max"))
     }
     
     func testNestedContainer() throws {
@@ -69,6 +70,19 @@ final class ParameterizeTests: XCTestCase {
             .serialize(object: params)
         XCTAssert(serialized.keys.contains("NAMINGCONVERT"))
     }
+    
+    func testCustomMapper() throws {
+        var params = ProductParams(customMapper: 123, optionalCustomMapper: nil)
+        var serialized = ParamSerializer().serialize(object: params)
+        
+        XCTAssertEqual(serialized["customMapper"] as? Int, 124)
+        XCTAssert(!serialized.keys.contains("optionalCustomMapper"))
+        
+        params.optionalCustomMapper = 100
+        
+        serialized = ParamSerializer().serialize(object: params)
+        XCTAssertEqual(serialized["optionalCustomMapper"] as? Int, 101)
+    }
 }
 
 struct ProductParams: ParamsContainer {
@@ -108,6 +122,18 @@ struct ProductParams: ParamsContainer {
     
     @Params
     var NamingConvert2: Int = 0
+    
+    @Params(mapper: { $0 + 1 })
+    var customMapper: Int = 0
+    
+    @Params(mapper: {
+        if let i = $0 {
+            return i + 1
+        } else {
+            return nil
+        }
+    })
+    var optionalCustomMapper: Int? = nil
     
     var filter: Filter = .init()
     
