@@ -11,6 +11,10 @@ final class ParameterizeTests: XCTestCase {
                                    productsTypes: ["normal"])
         let serialized = ParamSerializer().serialize(object: params)
         
+        /// make sure output type is `String`, not `Optional<String>`
+        XCTAssertEqual("\(serialized["query"] ?? "")", "search")
+        XCTAssertNotEqual("\(serialized["query"] ?? "")", "Optional(\"search\")")
+        
         XCTAssertEqual(serialized["query"] as? String, "search")
         XCTAssertEqual(serialized["ids"] as? String, "1,2,3")
         XCTAssertEqual(serialized["page"] as? Int, 2)
@@ -82,6 +86,10 @@ final class ParameterizeTests: XCTestCase {
         
         serialized = ParamSerializer().serialize(object: params)
         XCTAssertEqual(serialized["optionalCustomMapper"] as? Int, 101)
+        
+        /// make sure output type is `Int`, not `Optional<Int>`
+        XCTAssertEqual("\(serialized["optionalCustomMapper"] ?? 0)", "101")
+        XCTAssertNotEqual("\(serialized["optionalCustomMapper"] ?? 0)", "Optional(101)")
     }
 }
 
