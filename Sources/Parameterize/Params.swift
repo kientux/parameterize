@@ -36,47 +36,25 @@ extension Params: ParameterPair {
     }
     
     var value: Any? {
+        var v: Any?
+        
+        // go through this value to eliminate optional
+        let underlyingValue: Any
+        
         if let mapper = mapper {
-            return process(mappedValue: mapper(wrappedValue))
+            underlyingValue = mapper(wrappedValue) as Any
         } else {
-            return processWrappedValue()
+            underlyingValue = wrappedValue
         }
-    }
-    
-    /// Two functions below have completely the same body
-    /// but it required to split to 2 functions
-    /// because with `wrappedValue`, we need to directly access
-    /// instead of go through `Any?` parameter,
-    /// or else it will be wrapped into an `Optional<Any>` type
-    /// and produces incorrect output.
-    
-    private func processWrappedValue() -> Any? {
-        var v: Any?
         
-        if let value = wrappedValue as? OptionalProtocol {
+        if let value = underlyingValue as? OptionalProtocol {
             v = value.wrapped
         } else {
-            v = wrappedValue
+            v = underlyingValue
         }
         
         if let value = v as? ParamConvertible {
-            v = value.parameterValue
-        }
-        
-        return v
-    }
-    
-    private func process(mappedValue: Any?) -> Any? {
-        var v: Any?
-        
-        if let value = mappedValue as? OptionalProtocol {
-            v = value.wrapped
-        } else {
-            v = mappedValue
-        }
-        
-        if let value = v as? ParamConvertible {
-            v = value.parameterValue
+            v = value.parameterValue as Any
         }
         
         return v
