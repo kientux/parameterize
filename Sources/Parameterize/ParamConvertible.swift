@@ -11,18 +11,12 @@ public protocol ParamConvertible {
     var parameterValue: Any? { get }
 }
 
-extension Array: ParamConvertible {
+extension Array: ParamConvertible where Element: CustomStringConvertible {
     public var parameterValue: Any? {
         if isEmpty {
             return nil
         }
 
-        return map({
-            if let v = $0 as? any RawRepresentable {
-                return String(describing: v.rawValue)
-            } else {
-                return String(describing: $0)
-            }
-        }).joined(separator: ",")
+        return map({ $0.description }).joined(separator: ",")
     }
 }
