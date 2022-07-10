@@ -63,6 +63,10 @@ extension Params: ParameterPair {
             v = value.parameterValue
         }
         
+        if let value = v as? any RawRepresentable {
+            v = value.rawValue
+        }
+        
         return v
     }
     
@@ -77,6 +81,10 @@ extension Params: ParameterPair {
         
         if let value = v as? ParamConvertible {
             v = value.parameterValue
+        }
+        
+        if let value = v as? any RawRepresentable {
+            v = value.rawValue
         }
         
         return v
