@@ -15,7 +15,7 @@ components.queryItems = params.map { URLQueryItem(name: $0.key, value: "\($0.val
 
 - Auto infer name of param from field name, with default/snake_case or custom naming strategy
 - Nil and empty array will be remove automatically
-- Auto handle array of elements that conform to `CustomStringConvertible`
+- Auto handle array (of any elements or elements that conform to `ParamConvertible`)
 - Auto expand nested params
 - Support any custom type by conforms to `ParamConvertible`, or simply use an in-place custom mapper
 
@@ -85,6 +85,8 @@ print(serialized)
 ```
 
 > Note: Conversion will go through custom mapper first, if the returned value also conforms to `ParamConvertible` then it will be converted again using the `ParamConvertible` implementation.
+
+> Note: For enum with raw value, currently there's no easy way to automatically serialize its raw value. So you will still have to conform to `ParamConvertible`, but you don't have to write the `parameterValue` implementation. 
 
 ### Nested params will be expanded if also conforms to `ParamsContainer`
 

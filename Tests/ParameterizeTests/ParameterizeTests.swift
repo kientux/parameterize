@@ -8,7 +8,8 @@ final class ParameterizeTests: XCTestCase {
                                    ids: [1, 2, 3],
                                    page: 2,
                                    pageSize: 250,
-                                   productsTypes: ["normal"])
+                                   status: [.active, .inactive],
+                                   productsTypes: [.normal])
         let serialized = ParamSerializer().serialize(object: params)
         
         /// make sure output type is `String`, not `Optional<String>`
@@ -19,6 +20,8 @@ final class ParameterizeTests: XCTestCase {
         XCTAssertEqual(serialized["ids"] as? String, "1,2,3")
         XCTAssertEqual(serialized["page"] as? Int, 2)
         XCTAssertEqual(serialized["limit"] as? Int, 250)
+        XCTAssertEqual(serialized["status"] as? String, "0,-1")
+        XCTAssertEqual(serialized["product_type"] as? String, "normal")
         XCTAssertEqual(serialized["product_types"] as? String, "normal")
     }
     
@@ -114,10 +117,13 @@ struct ProductParams: ParamsContainer {
     var createdOnMax: Date? = nil
     
     @Params
-    var status: [String] = ["active"]
+    var status: [Status] = [.active]
+    
+    @Params("product_type")
+    var productsType: ProductType = .normal
     
     @Params("product_types")
-    var productsTypes: [String] = []
+    var productsTypes: [ProductType] = []
     
     @Params("custom_type")
     var myUrl: MyCustomType? = nil
@@ -163,6 +169,16 @@ struct ProductParams: ParamsContainer {
         @Params("test3")
         var type: String = "value3"
     }
+}
+
+enum ProductType: String, ParamConvertible {
+    case normal
+    case special
+}
+
+enum Status: Int, ParamConvertible {
+    case active = 0
+    case inactive = -1
 }
 
 struct MyCustomType: ParamConvertible {
