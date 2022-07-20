@@ -3,6 +3,13 @@ import XCTest
 
 final class ParameterizeTests: XCTestCase {
     
+    private func assertString(_ value: Any?, _ expected: String) {
+        /// convert to `String` to make sure `value` is not `Optional` type
+        /// because `Optional` type will become `"Optional(123)"` instead of `123`
+        /// when serialized and it's incorrect.
+        XCTAssertEqual(String(describing: value ?? ""), expected)
+    }
+    
     func testSerialize() throws {
         let params = ProductParams(query: "search",
                                    ids: [1, 2, 3],
@@ -12,17 +19,13 @@ final class ParameterizeTests: XCTestCase {
                                    productsTypes: [.normal])
         let serialized = ParamSerializer().serialize(object: params)
         
-        /// make sure output type is `String`, not `Optional<String>`
-        XCTAssertEqual("\(serialized["query"] ?? "")", "search")
-        XCTAssertNotEqual("\(serialized["query"] ?? "")", "Optional(\"search\")")
-        
-        XCTAssertEqual(serialized["query"] as? String, "search")
-        XCTAssertEqual(serialized["ids"] as? String, "1,2,3")
-        XCTAssertEqual(serialized["page"] as? Int, 2)
-        XCTAssertEqual(serialized["limit"] as? Int, 250)
-        XCTAssertEqual(serialized["status"] as? String, "0,-1")
-        XCTAssertEqual(serialized["product_type"] as? String, "normal")
-        XCTAssertEqual(serialized["product_types"] as? String, "normal")
+        assertString(serialized["query"], "search")
+        assertString(serialized["ids"], "1,2,3")
+        assertString(serialized["page"], "2")
+        assertString(serialized["limit"], "250")
+        assertString(serialized["status"], "0,-1")
+        assertString(serialized["product_type"], "normal")
+        assertString(serialized["product_types"], "normal")
     }
     
     func testCustomType() throws {
@@ -31,8 +34,8 @@ final class ParameterizeTests: XCTestCase {
                                    myUrl: .init(url: URL(string: "https://google.com")!))
         let serialized = ParamSerializer().serialize(object: params)
         
-        XCTAssertEqual(serialized["created_on_min"] as? String, "1970-01-01T00:00:01Z")
-        XCTAssertEqual(serialized["custom_type"] as? String, "https%3A%2F%2Fgoogle%2Ecom")
+        assertString(serialized["created_on_min"], "1970-01-01T00:00:01Z")
+        assertString(serialized["custom_type"], "https%3A%2F%2Fgoogle%2Ecom")
         XCTAssert(!serialized.keys.contains("created_on_max"))
     }
     
@@ -40,9 +43,9 @@ final class ParameterizeTests: XCTestCase {
         let params = ProductParams()
         let serialized = ParamSerializer().serialize(object: params)
         
-        XCTAssertEqual(serialized["test"] as? String, "value")
-        XCTAssertEqual(serialized["test2"] as? String, "value2")
-        XCTAssertEqual(serialized["test3"] as? String, "value3")
+        assertString(serialized["test"], "value")
+        assertString(serialized["test2"], "value2")
+        assertString(serialized["test3"], "value3")
     }
     
     func testNilAndEmptyArray() throws {
@@ -82,17 +85,13 @@ final class ParameterizeTests: XCTestCase {
         var params = ProductParams(customMapper: 123, optionalCustomMapper: nil)
         var serialized = ParamSerializer().serialize(object: params)
         
-        XCTAssertEqual(serialized["customMapper"] as? Int, 124)
+        assertString(serialized["customMapper"], "124")
         XCTAssert(!serialized.keys.contains("optionalCustomMapper"))
         
         params.optionalCustomMapper = 100
         
         serialized = ParamSerializer().serialize(object: params)
-        XCTAssertEqual(serialized["optionalCustomMapper"] as? Int, 101)
-        
-        /// make sure output type is `Int`, not `Optional<Int>`
-        XCTAssertEqual("\(serialized["optionalCustomMapper"] ?? 0)", "101")
-        XCTAssertNotEqual("\(serialized["optionalCustomMapper"] ?? 0)", "Optional(101)")
+        assertString(serialized["optionalCustomMapper"], "101")
     }
 }
 
