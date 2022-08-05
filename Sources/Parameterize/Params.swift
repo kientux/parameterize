@@ -37,7 +37,7 @@ extension Params: ParameterPair {
     
     var value: Any? {
         if let mapper = mapper {
-            return process(mappedValue: mapper(wrappedValue))
+            return process(mappedValue: mapper(wrappedValue) as Any)
         } else {
             return processWrappedValue()
         }
@@ -66,7 +66,7 @@ extension Params: ParameterPair {
         return v
     }
     
-    private func process(mappedValue: Any?) -> Any? {
+    private func process(mappedValue: Any) -> Any? {
         var v: Any?
         
         if let value = mappedValue as? OptionalProtocol {
